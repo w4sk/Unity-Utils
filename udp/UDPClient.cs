@@ -1,7 +1,4 @@
 using UnityEngine;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
 
 public class UDPClient : MonoBehaviour
 {
@@ -9,19 +6,25 @@ public class UDPClient : MonoBehaviour
     [SerializeField] private int port = 12345;
 
     private UDPClientWrapper udpClient;
+    private string messageToSend = "";
+
+    // プロパティを導入
+    public string MessageToSend
+    {
+        get { return messageToSend; }
+        set { messageToSend = value; }
+    }
 
     void Start()
     {
         udpClient = new UDPClientWrapper(IPAdress, port);
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!string.IsNullOrEmpty(messageToSend))
         {
-            string message = "Send Message";
-            byte[] data = Encoding.UTF8.GetBytes(message);
-            udpClient.Send(data, data.Length);
+            udpClient.Send(messageToSend);
         }
     }
 
