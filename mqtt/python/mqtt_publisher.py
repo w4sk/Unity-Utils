@@ -44,6 +44,24 @@ def publish(client):
 def run():
     client = connect_mqtt()
     client.loop_start()
+    from datetime import datetime
+
+    def publish(client):
+        msg_count = 0
+        while True:
+            time.sleep(1)
+            msg = f"messages: {msg_count}"
+            current_time = datetime.now().strftime('%H:%M:%S.%f')
+            msg_with_time = f"{msg} at {current_time}"
+            result = client.publish(topic, msg_with_time)
+            # result: [0, 1]
+            status = result[0]
+            if status == 0:
+                print(f"Send `{msg_with_time}` to topic `{topic}`")
+            else:
+                print(f"Failed to send message to topic {topic}")
+            msg_count += 1
+
     publish(client)
 
 
