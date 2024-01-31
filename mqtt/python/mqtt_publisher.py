@@ -1,5 +1,6 @@
 import random
 import time
+import os
 
 from paho.mqtt import client as mqtt_client
 
@@ -48,6 +49,13 @@ def run():
 
     def publish(client):
         msg_count = 0
+        max_byte_msg =  msg = os.urandom(128 * 1024)  # 128KBのランダムバイナリデータ
+        result = client.publish(topic, max_byte_msg)
+        status = result[0]
+        if status == 0:
+            print(datetime.now().strftime('%H:%M:%S.%f'))
+        else:
+            print(f"Failed to send message to topic {topic}")
         while True:
             time.sleep(1)
             msg = f"messages: {msg_count}"
