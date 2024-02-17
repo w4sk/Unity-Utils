@@ -1,77 +1,48 @@
 import random
 import time
 import os
+import threading
 
 from paho.mqtt import client as mqtt_client
 
+class MQTTPublisher:
+    def __init__(self, broker='localhost', port=1883, topic='python/mqtt'):
+        self.broker = broker
+        self.port = port
+        self.topic = topic
+        self.client_id = f'python-mqtt-{random.randint(0, 100)}'
+        # self.username = 'emqx'
+        # self.password = 'public'
+        self.client = self.connect_mqtt()
 
-broker = 'localhost'
-port = 1883
-topic = "python/mqtt"
-# generate client ID with pub prefix randomly
-client_id = f'python-mqtt-{random.randint(0, 1000)}'
-# username = 'emqx'
-# password = 'public'
-
-def connect_mqtt():
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to MQTT Broker!")
-        else:
-            print("Failed to connect, return code %d\n", rc)
-
-    client = mqtt_client.Client(client_id)
-    # client.username_pw_set(username, password)
-    client.on_connect = on_connect
-    client.connect(broker, port)
-    return client
-
-
-def publish(client):
-    msg_count = 0
-    while True:
-        time.sleep(1)
-        msg = f"messages: {msg_count}"
-        result = client.publish(topic, msg)
-        # result: [0, 1]
-        status = result[0]
-        if status == 0:
-            print(f"Send `{msg}` to topic `{topic}`")
-        else:
-            print(f"Failed to send message to topic {topic}")
-        msg_count += 1
-
-
-def run():
-    client = connect_mqtt()
-    client.loop_start()
-    from datetime import datetime
-
-    def publish(client):
-        msg_count = 0
-        max_byte_msg =  msg = os.urandom(128 * 1024)  # 128KBのランダムバイナリデータ
-        result = client.publish(topic, max_byte_msg)
-        status = result[0]
-        if status == 0:
-            print(datetime.now().strftime('%H:%M:%S.%f'))
-        else:
-            print(f"Failed to send message to topic {topic}")
-        while True:
-            time.sleep(1)
-            msg = f"messages: {msg_count}"
-            current_time = datetime.now().strftime('%H:%M:%S.%f')
-            msg_with_time = f"{msg} at {current_time}"
-            result = client.publish(topic, msg_with_time)
-            # result: [0, 1]
-            status = result[0]
-            if status == 0:
-                print(f"Send `{msg_with_time}` to topic `{topic}`")
+    def connect_mqtt(self):
+        def on_connect(client, userdata, flags, rc):
+            if rc == 0:
+                print("Connected to MQTT Broker!")
             else:
-                print(f"Failed to send message to topic {topic}")
-            msg_count += 1
+                print("Failed to connect, return code %d\n", rc)
 
-    publish(client)
+        client = mqtt_client.Client(self.client_id)
+        # client.username_pw_set(username, password)
+        client.on_connect = on_connect
+        client.connect(self.broker, self.port)
+        return client
+
+    def publish(self, msg_count=0):
+        time.sleep(1)  # このスリープは必要に応じて調整してください。
+        msg = f"messages: {msg_count}"
+        result = self.client.publish(self.topic, msg)
+        status = result[0]
+        if status == 0:
+            print(f"Send `{msg}` to topic `{self.topic}`")
+        else:
+            print(f"Failed to send message to topic {self.topic}")
+        threading.Timer(1, self.publish, args=(msg_count+1,)).start()  # 1秒後に再度publishを呼び出す
+
+    def run(self):
+        self.publish()
 
 
 if __name__ == '__main__':
-    run()
+    publisher = MQTTPublisher()
+    publisher.run()
