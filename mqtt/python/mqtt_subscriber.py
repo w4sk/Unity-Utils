@@ -4,7 +4,7 @@ from paho.mqtt import client as mqtt_client
 
 
 class MQTTSubscriber:
-  def __init__(self, broker='localhost', port=1883, topic="python/mqtt"):
+  def __init__(self, broker='192.168.207.159', port=1883, topic="echo"):
     self.broker = broker
     self.port = port
     self.topic = topic
