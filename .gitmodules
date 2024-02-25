@@ -1,3 +1,3 @@
-[submodule "mqtt/unity-sample/mqtt/unity-sample"]
-	path = mqtt/unity-sample/mqtt/unity-sample
+[submodule "mqtt/unity-sample"]
+	path = mqtt/unity-sample
 	url = git@github.com:CE-SDV-Unity/M2MqttUnity.git
